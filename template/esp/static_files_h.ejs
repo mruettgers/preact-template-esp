@@ -1,0 +1,31 @@
+#pragma once
+
+namespace static_files
+{
+    struct file
+    {
+        const char *path;
+        uint32_t size;
+        const char *type;
+        const uint8_t *contents;
+    };
+
+    <% for(var i=0; i<files.length; i++) {%>
+    const uint32_t f_<%= files[i].normalizedName %>_size PROGMEM = <%= files[i].size %>;     
+    const uint8_t f_<%= files[i].normalizedName %>_contents[] PROGMEM = {        
+    <%= files[i].contents %>
+    };
+    <% } %>
+
+
+    const file files[] PROGMEM = {
+    <% for(var i=0; i<files.length; i++) {%>
+        {.path = "<%= files[i].path %>",
+            .size = f_<%= files[i].normalizedName %>_size,
+            .type = "<%= files[i].mimeType %>",
+            .contents = f_<%= files[i].normalizedName %>_contents}<% if (i < files.length-1) { %>,<% } %>
+    <% } %>
+    };
+
+    const uint8_t num_of_files PROGMEM = sizeof(files) / sizeof(const file);
+}
