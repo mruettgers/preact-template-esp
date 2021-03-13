@@ -72,7 +72,9 @@ for (int i = 0; i< static_files::num_of_files; i++) {
     });  
 }
 ```
+## Acknowledgements
 
+This template is based on [https://github.com/preactjs-templates/simple](https://github.com/preactjs-templates/simple), a simple, minimal "Hello World" template for Preact CLI.
 
 ## Donate
 
