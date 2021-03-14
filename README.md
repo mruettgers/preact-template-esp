@@ -56,29 +56,60 @@ namespace static_files
 ```
 </details>
 
-## ESP8266WebServer
+## ESP8266WebServer and ESP32's native webserver
 
 ```c++
-#include <ESP8266WebServer.h>
+#include <WiFi.h>
+#ifdef ESP32
+#include <WebServer.h>
+#elif defined(ESP8266)
+<ESP8266WebServer.h
+#endif
 #include "web/static_files.h"
-ESP8266WebServer server(80);
 
-// Optional, defines the default entrypoint
-server.on("/", [] {
+WebServer server(80);
+
+const char *ssid = "YOUR SSID";
+const char *password = "YOUR PASSWORD";
+
+void setup()
+{
+  WiFi.begin(ssid, password);
+  Serial.begin(115200);
+  delay(100);
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("Connected to ");
+  Serial.print(ssid);
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+
+  // Optional, defines the default entrypoint
+  server.on("/", [] {
     server.sendHeader("Content-Encoding", "gzip");
-    server.send_P(200, "text/html", (const char*)static_files::f_index_html_contents, static_files::f_index_html_size);
-});  
+    server.send_P(200, "text/html", (const char *)static_files::f_index_html_contents, static_files::f_index_html_size);
+  });
 
-// Create a route handler for each of the build artifacts
-for (int i = 0; i< static_files::num_of_files; i++) {
+  // Create a route handler for each of the build artifacts
+  for (int i = 0; i < static_files::num_of_files; i++)
+  {
     server.on(static_files::files[i].path, [i] {
-        server.sendHeader("Content-Encoding", "gzip");
-        server.send_P(200, static_files::files[i].type, (const char*)static_files::files[i].contents, static_files::files[i].size);
-    });  
+      server.sendHeader("Content-Encoding", "gzip");
+      server.send_P(200, static_files::files[i].type, (const char *)static_files::files[i].contents, static_files::files[i].size);
+    });
+  }
+  server.begin();
+}
+
+void loop() {
+  server.handleClient();
 }
 ```
 
-## ESPAsyncWebServer
+## ESP Async WebServer
 
 ```c++
 #ifdef ESP32
