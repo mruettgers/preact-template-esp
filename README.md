@@ -58,7 +58,7 @@ namespace static_files
 ```
 </details>
 
-## ESP8266WebServer and ESP32's native webserver
+### ESP8266WebServer and ESP32's native webserver
 
 ```c++
 #include <WiFi.h>
@@ -111,7 +111,7 @@ void loop() {
 }
 ```
 
-## ESP Async WebServer
+### ESP Async WebServer
 
 ```c++
 #ifdef ESP32
