@@ -124,6 +124,9 @@ void loop() {
 
 AsyncWebServer server(80);
 
+const char *ssid = "YOUR SSID";
+const char *password = "YOUR PASSWORD";
+
 void setup()
 {
 
