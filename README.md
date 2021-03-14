@@ -14,9 +14,11 @@ To bootstrap a new project based on this template simply type:
 When ready build as usual:  
 `npm run build`
 
-If your build succeeds you will find a file named `static_files.h` within your build folder like the following one:
-
-```c++
+If your build succeeds you will find a file named `static_files.h` within your build folder that could be directly included in your application.
+<details>
+  <summary>Show sample of "static_files.h"</summary>
+    
+  ```c++
 #pragma once
 namespace static_files
 {
@@ -52,6 +54,7 @@ namespace static_files
     const uint8_t num_of_files PROGMEM = sizeof(files) / sizeof(const file);
 }
 ```
+</details>
 
 ## ESP8266WebServer
 
@@ -62,18 +65,49 @@ ESP8266WebServer server(80);
 
 // Optional, defines the default entrypoint
 server.on("/", [] {
-    server.sendHeader(F("Content-Encoding"), F("gzip"));
+    server.sendHeader("Content-Encoding", "gzip");
     server.send_P(200, "text/html", (const char*)static_files::f_index_html_contents, static_files::f_index_html_size);
 });  
 
 // Create a route handler for each of the build artifacts
 for (int i = 0; i< static_files::num_of_files; i++) {
     server.on(static_files::files[i].path, [i] {
-        server.sendHeader(F("Content-Encoding"), F("gzip"));
+        server.sendHeader("Content-Encoding", "gzip");
         server.send_P(200, static_files::files[i].type, (const char*)static_files::files[i].contents, static_files::files[i].size);
     });  
 }
 ```
+
+## ESPAsyncWebServer
+
+```c++
+#ifdef ESP32
+#include <WiFi.h>
+#include <AsyncTCP.h>
+#elif defined(ESP8266)
+#include <ESP8266WiFi.h>
+#include <ESPAsyncTCP.h>
+#endif
+#include <ESPAsyncWebServer.h>
+#include "web/static_files.h"
+
+AsyncWebServer server(80);
+
+server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+    AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", static_files::f_index_html_contents, static_files::f_index_html_size);
+    response->addHeader("Content-Encoding", "gzip");
+    request->send(response);
+});  
+for (int i = 0; i< static_files::num_of_files; i++) {
+    server.on(static_files::files[i].path, HTTP_GET, [i](AsyncWebServerRequest *request) {
+        AsyncWebServerResponse *response = request->beginResponse_P(200, static_files::files[i].type, static_files::files[i].contents, static_files::files[i].size);
+        response->addHeader("Content-Encoding", "gzip");
+        request->send(response);
+    });  
+}
+server.begin();
+```
+
 ## Acknowledgements
 
 This template is based on [https://github.com/preactjs-templates/simple](https://github.com/preactjs-templates/simple), a simple, minimal "Hello World" template for Preact CLI.
