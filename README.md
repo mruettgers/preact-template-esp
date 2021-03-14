@@ -82,8 +82,8 @@ void setup()
     delay(500);
     Serial.print(".");
   }
-  Serial.println("Connected to ");
-  Serial.print(ssid);
+  Serial.print("Connected to: ");
+  Serial.println(ssid);
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 
@@ -124,22 +124,42 @@ void loop() {
 
 AsyncWebServer server(80);
 
-// Optional, defines the default entrypoint
-server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+void setup()
+{
+
+  WiFi.begin(ssid, password);
+  Serial.begin(115200);
+  delay(100);
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.print("Connected to: ");
+  Serial.println(ssid);
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+
+  // Optional, defines the default entrypoint
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
     AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", static_files::f_index_html_contents, static_files::f_index_html_size);
     response->addHeader("Content-Encoding", "gzip");
     request->send(response);
-});
+  });
 
-// Create a route handler for each of the build artifacts
-for (int i = 0; i< static_files::num_of_files; i++) {
+  // Create a route handler for each of the build artifacts
+  for (int i = 0; i < static_files::num_of_files; i++)
+  {
     server.on(static_files::files[i].path, HTTP_GET, [i](AsyncWebServerRequest *request) {
-        AsyncWebServerResponse *response = request->beginResponse_P(200, static_files::files[i].type, static_files::files[i].contents, static_files::files[i].size);
-        response->addHeader("Content-Encoding", "gzip");
-        request->send(response);
-    });  
+      AsyncWebServerResponse *response = request->beginResponse_P(200, static_files::files[i].type, static_files::files[i].contents, static_files::files[i].size);
+      response->addHeader("Content-Encoding", "gzip");
+      request->send(response);
+    });
+  }
+  server.begin();
 }
-server.begin();
+
+void loop() {}
 ```
 
 ## Acknowledgements
