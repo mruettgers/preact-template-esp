@@ -93,11 +93,14 @@ for (int i = 0; i< static_files::num_of_files; i++) {
 
 AsyncWebServer server(80);
 
+// Optional, defines the default entrypoint
 server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
     AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", static_files::f_index_html_contents, static_files::f_index_html_size);
     response->addHeader("Content-Encoding", "gzip");
     request->send(response);
-});  
+});
+
+// Create a route handler for each of the build artifacts
 for (int i = 0; i< static_files::num_of_files; i++) {
     server.on(static_files::files[i].path, HTTP_GET, [i](AsyncWebServerRequest *request) {
         AsyncWebServerResponse *response = request->beginResponse_P(200, static_files::files[i].type, static_files::files[i].contents, static_files::files[i].size);
