@@ -13,10 +13,31 @@ TBD.
 To bootstrap a new project based on this template simply type:  
 `preact create mruettgers/preact-template-esp [YOUR PROJECT NAME]`
 
-When ready build as usual:  
-`npm run build`
-
+When ready build as usual with `npm run build`.
 If your build succeeds you will find a file named `static_files.h` within your build folder that could be directly included in your application.
+
+```
+root@a31200ddd18b:/workbench/preact/esp-test# npm run build
+
+> esp-test-3@0.0.0 build
+> preact build --no-sw --no-esm --no-sw --no-json --no-prerender --no-inline-css --no-prerenderUrls
+
+ Build  [=================== ] 95% (2.6s) emitting
+   bundle.c3928.css ⏤  108 B (+108 B)
+    bundle.*****.js ⏤  4.74 kB (+4.74 kB)
+ polyfills.*****.js ⏤  2.14 kB (+2.14 kB)
+         index.html ⏤  389 B (+389 B)
+           200.html ⏤  396 B (+396 B)
+
+<i> [ESPBuildPlugin] Added asset bundle.c3928.css with a size of 108 bytes.
+<i> [ESPBuildPlugin] Added asset polyfills.03bf6.js with a size of 2139 bytes.
+<i> [ESPBuildPlugin] Added asset bundle.aee86.js with a size of 4740 bytes.
+<i> [ESPBuildPlugin] Added asset favicon.ico with a size of 4527 bytes.
+<i> [ESPBuildPlugin] Added asset index.html with a size of 389 bytes.
+<i> [ESPBuildPlugin] Added asset assets/favicon.ico with a size of 4527 bytes.
+<i> [ESPBuildPlugin] Build artifact has been written to /workbench/preact/esp-test/build/static_files.h.
+``` 
+
 <details>
   <summary>Show sample of "static_files.h"</summary>
     
