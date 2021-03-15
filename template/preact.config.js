@@ -1,5 +1,5 @@
 const webpack = require('webpack');
-const ESPBuildPlugin = require('./esp/build');
+const ESPBuildPlugin = require('./esp/esp-build-plugin');
 
 export default {
     webpack(config, env, helpers, options) {
@@ -7,7 +7,13 @@ export default {
             config.devtool = false;
             config.plugins = [
                 ...config.plugins,
-                new ESPBuildPlugin(env)
+                new ESPBuildPlugin({
+                    exclude: [
+                        '200.html',
+                        'preact_prerender_data.json',
+                        'push-manifest.json'
+                    ]
+                })
             ];
         };
     }

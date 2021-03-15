@@ -1,57 +1,75 @@
-const mime = require('mime-types')
-const ejs = require('ejs');
-const fs = require('fs');
-const { gzip, gzipSync } = require('zlib');
-
-const readFile = function (filename) {
-    var response = "";
-    var data = gzipSync(fs.readFileSync(filename));
-    for (i = 0; i < data.length; i++) {
-        if (i % 16 == 0) response += "\n";
-        response += '0x' + ('00' + data[i].toString(16)).slice(-2);
-        if (i < data.length - 1) response += ', ';
-    }
-    return {
-        contents: response,
-        size: data.length,
-    }
-}
+import mime from 'mime-types';
+import ejs from 'ejs';
+import { readFileSync, writeFileSync } from 'fs';
+import { gzipSync } from 'zlib';
 
 class ESPBuildPlugin {
-    constructor(env) {
-        this.env = env;
+    constructor(options) {
+        this.compiler = null;
+        this.assets = [];
+        this.options = options || {};
+        this.pluginName = this.constructor.name;
     }
+
     apply(compiler) {
-        compiler.hooks.afterEmit.tap('AfterEmitPlugin', (compilation) => {
-            const files = Array.from(compilation.assetsInfo.keys());
-            const data = {
-                files: files
-                    .filter(file => {
-                        if (file === '200.html') {
-                            return false;
-                        }
-                        return true;
-                    })
-                    .map(file => {
-                        const path = this.env.dest + '/' + file;
-                        const mimeType = mime.lookup(path)
-                        return {
-                            path: '/' + file,
-                            normalizedName: file.replace(/[^0-9a-z]/ig, '_'),
-                            mimeType,
-                            ...readFile(path)
-                        };
-                    })
-            };
-            ejs.renderFile(
-                'esp/static_files_h.ejs',
-                data,
-                {},
-                function (err, str) {
-                    fs.writeFileSync(this.env.dest + '/static_files.h', str);
-                }.bind(this)
-            );
+        this.compiler = compiler;
+        compiler.hooks.assetEmitted.tap(this.pluginName, (file) => {
+            this.addAsset(file);
         });
+        compiler.hooks.afterEmit.tap(this.pluginName, () => {
+            this.createESPOutputFile();
+        });
+    }
+
+    addAsset(file) {
+        for (var pattern of (this.options.exclude || [])) {
+            if (file.match(pattern) !== null) {
+                // Asset is excluded
+                return false;
+            }
+        }
+        const path = this.compiler.options.output.path + '/' + file;
+        const mimeType = mime.lookup(path)
+        const asset = this.readAndProcessAsset(path);
+        this.assets.push({
+            path: '/' + file,
+            normalizedName: file.replace(/[^0-9a-z]/ig, '_'),
+            mimeType,
+            ...asset
+        })
+        this.getLogger().info(`Added asset ${file} with a size of ${asset.size} bytes.`);
+    }
+
+    readAndProcessAsset(path) {
+        var response = "";
+        var contents = gzipSync(readFileSync(path));
+        for (var i = 0; i < contents.length; i++) {
+            if (i % 16 == 0) response += "\n";
+            response += '0x' + ('00' + contents[i].toString(16)).slice(-2);
+            if (i < contents.length - 1) response += ', ';
+        }
+        return {
+            contents: response,
+            size: contents.length,
+        }
+    }
+
+    createESPOutputFile() {
+        ejs.renderFile(
+            'esp/static_files_h.ejs',
+            {files: this.assets},
+            {},
+            (err, str) => {
+                const outputPath = this.compiler.options.output.path + '/static_files.h';
+                writeFileSync(outputPath, str);
+                this.getLogger().info(`Build artifact has been written to ${outputPath}.`);
+
+            }
+        );
+    }
+
+    getLogger() {
+        return this.compiler.getInfrastructureLogger(this.pluginName);
     }
 }
 
