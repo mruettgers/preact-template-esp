@@ -190,9 +190,6 @@ This template is based on [https://github.com/preactjs-templates/simple](https:/
 
 ## Donate
 
-### Bitcoin
-16XujKGLtx1Lp9ZTvdbpY6Km7jbLHjW2sD
-
 ### Paypal
 [![Paypal](https://www.paypalobjects.com/en_US/DK/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=GK95YZCEGJT84)
 
