@@ -1,10 +1,6 @@
 # preact-simple-esp
 
-A simple, minimal "Hello World" template for Preact CLI for being used on a ESP8266/ESP32
-
-## About
-
-TBD.
+A simple, minimal "Hello World" template for Preact CLI for being used on a ESP8266/ESP32.
 
 ## Usage
 
